@@ -5,4 +5,11 @@ title: Todo application with htmx
 
 # Todo application with htmx
 
-<div hx-get="/api/todos" hx-trigger="load"></div>
+```js
+const makeLoadPage = (params) => {
+    return html`<div hx-get="/api/todos${params}" hx-trigger="load"><p>I'm loading here</p></div>`;
+};
+display(makeLoadPage(window.location.search))
+await visibility();
+htmx.process(document.body)
+```

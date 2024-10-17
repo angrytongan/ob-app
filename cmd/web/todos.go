@@ -16,6 +16,11 @@ type Todo struct {
 var todos map[int]Todo
 
 func (app *Application) Todos(w http.ResponseWriter, r *http.Request) {
+	/*
+		r.ParseForm()
+		fmt.Println(r.Form)
+	*/
+
 	pageData := map[string]any{
 		"Todos":   todos,
 		"Message": fmt.Sprintf("%d todos.", len(todos)),
