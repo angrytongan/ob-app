@@ -1,10 +1,8 @@
 ---
 theme: dashboard
+sql:
+    csv: ./data/rand-xy.csv
 ---
-
-```js
-const db = DuckDBClient.of({ data: FileAttachment("./data/rand-xy.csv") });
-```
 
 # Observable app
 
@@ -13,38 +11,44 @@ Go backend and communicates to it using HTMX.
 
 ## Simple API calls
 
-<!-- a couple of calls to the backend api -->
-<div class="grid grid-cols-2">
-    <div class="card">
-        <h2>server time</h2>
-        <button
-            hx-get="/api/now"
-            hx-target="#now"
-            hx-swap="innerHTML">hit me</button>
-        <span id="now"></span>
-    </div>
-    <div class="card">
-        <h2>server time + 10minutes</h2>
-        <button
-            hx-get="/api/then"
-            hx-target="#then"
-            hx-swap="innerHTML">hit me</button>
-        <span id="then"></span>
-    </div>
+<div class="card">
+    <h2>server time via htmx</h2>
+    <button
+        hx-get="/api/now"
+        hx-target="#now"
+        hx-swap="innerHTML">hit me</button>
+    <span id="now"></span>
 </div>
 
 <!-- making sure deployment works with file attachments -->
 
-```js
-const data = db.sql`SELECT * FROM data`;
-const div2 = FileAttachment("./data/rand-xy-div2.csv").csv({ typed: true });
+```sql id=csv
+SELECT r, x, y FROM csv
 ```
 
-<!-- and making sure deployment works with plot -->
+```js
+const server = await fetch(`/api/random-points/${numPoints}`)
+  .then((r) => {
+    if (r.ok) {
+      return r.json();
+    }
+
+    console.error(`received ${r.statusText}`)
+    return [];
+  })
+  .catch((err) => {
+    console.error(err);
+    return []
+  });
+const data = [
+  { points: csv, colour: 'green' },
+  { points: server, colour: 'orange' },
+];
+```
 
 ```js
-const plot = resize((width) =>
-  Plot.plot({
+const dotPlot = (data) => resize((width) => {
+  const config = {
     width,
     height: 200,
     x: {
@@ -60,21 +64,40 @@ const plot = resize((width) =>
       Plot.axisY({
         ticks: d3.ticks(0, 100, 10),
       }),
-      Plot.dot(data, {
-        x: "x",
-        y: "y",
-        stroke: "green",
-      }),
-      Plot.dot(div2, {
-        x: "x",
-        y: "y",
-        stroke: "blue",
-      }),
     ],
-  })
-);
+  };
+
+  data.forEach((d) => {
+    config.marks.push(
+      Plot.dot(d.points, {
+        x: "x",
+        y: "y",
+        r: "r",
+        stroke: d.colour,
+      })
+    );
+  });
+    config.marks.push(
+      Plot.dot([], {
+        x: "x",
+        y: "y",
+        r: "r",
+        stroke: 'blue'
+      })
+    );
+
+  return Plot.plot(config)
+});
 ```
 
 <div class="card">
-    ${plot}
+
+```js
+const numPoints = view(Inputs.range([0, 100], { step: 10 }));
+```
+
+```js
+display(dotPlot(data));
+```
+
 </div>

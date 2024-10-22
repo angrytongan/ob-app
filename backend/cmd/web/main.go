@@ -45,11 +45,12 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/now", app.Now)
-	mux.HandleFunc("/api/then", app.Then)
 
 	mux.HandleFunc("GET /api/todos", app.Todos)
 	mux.HandleFunc("POST /api/todos/add", app.TodosAdd)
 	mux.HandleFunc("POST /api/todos/toggle/{id}", app.TodosToggle)
+
+	mux.HandleFunc("GET /api/random-points/{num}", app.RandomPoints)
 
 	fmt.Println("Listening on port", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), logger(mux)))
