@@ -77,14 +77,6 @@ const dotPlot = (data) => resize((width) => {
       })
     );
   });
-    config.marks.push(
-      Plot.dot([], {
-        x: "x",
-        y: "y",
-        r: "r",
-        stroke: 'blue'
-      })
-    );
 
   return Plot.plot(config)
 });
